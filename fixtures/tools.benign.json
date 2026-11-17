@@ -1,0 +1,49 @@
+{
+  "server": "benign-demo",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a UTF-8 text file from the workspace. Returns the file content and its byte length. Paths outside the workspace are rejected.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Relative path inside the workspace, for example docs/README.md"
+          }
+        },
+        "required": ["path"],
+        "additionalProperties": false
+      },
+      "annotations": { "title": "Read file", "readOnlyHint": true }
+    },
+    {
+      "name": "search_docs",
+      "description": "Search the local documentation index and return the top matching sections with source anchors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Search terms" },
+          "top_k": { "type": "integer", "default": 5, "minimum": 1, "maximum": 20 }
+        },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "annotations": { "title": "Search docs", "readOnlyHint": true }
+    },
+    {
+      "name": "summarize",
+      "description": "Summarize a text passage. The summary is generated locally with a sentence-ranking heuristic and never leaves the process.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "description": "Passage to summarize" },
+          "max_sentences": { "type": "integer", "default": 3 }
+        },
+        "required": ["text"],
+        "additionalProperties": false
+      },
+      "annotations": { "title": "Summarize", "readOnlyHint": true }
+    }
+  ]
+}
