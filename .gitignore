@@ -1,0 +1,22 @@
+# Operational artifacts (OMC runtime state)
+.omc/
+
+# Raw research dumps (agent working files, third-party README snapshots)
+research/_raw/
+
+# MoonBit build outputs
+_build/
+target/
+*.wasm
+.mooncakes/
+pkg.generated.mbti
+
+# Scanner outputs
+out/
+*.sarif
+*.scan.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
