@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MoonBit
+        uses: hustcer/setup-moonbit@v1
+
+      - name: Check (deny warnings)
+        run: moon check --deny-warn
+
+      - name: Test
+        run: moon test
+
+      - name: Build (native)
+        run: moon build --target native
+
+      # 直接运行二进制：`moon run` 会掩盖进程真实退出码，CI 门禁必须验证
+      # 0/1/2 三种语义。
+      - name: Exit code 1 on critical findings
+        run: |
+          BIN=./_build/native/debug/build/cmd/main/main
+          set +e
+          "$BIN" scan --snapshot fixtures/tools.evil.json > /dev/null
+          code=$?
+          set -e
+          echo "exit=$code"
+          test "$code" -eq 1
+
+      - name: Exit code 0 on clean fixture
+        run: |
+          BIN=./_build/native/debug/build/cmd/main/main
+          "$BIN" scan --snapshot fixtures/tools.benign.json
+
+      - name: Exit code 2 on read failure
+        run: |
+          BIN=./_build/native/debug/build/cmd/main/main
+          set +e
+          "$BIN" scan --snapshot does-not-exist.json > /dev/null
+          code=$?
+          set -e
+          test "$code" -eq 2
+
+      - name: SARIF output is valid JSON 2.1.0
+        run: |
+          BIN=./_build/native/debug/build/cmd/main/main
+          set +e
+          "$BIN" scan --snapshot fixtures/tools.evil.json --format sarif > scan.sarif
+          set -e
+          python3 - << 'PY'
+          import json
+          d = json.load(open("scan.sarif"))
+          assert d["version"] == "2.1.0"
+          assert d["runs"][0]["tool"]["driver"]["name"] == "mcpscan"
+          assert len(d["runs"][0]["results"]) > 0
+          print("sarif ok:", len(d["runs"][0]["results"]), "results")
+          PY
+
+      - name: Baseline round trip
+        run: |
+          BIN=./_build/native/debug/build/cmd/main/main
+          "$BIN" baseline --snapshot fixtures/tools.evil.json --write baseline.json
+          set +e
+          "$BIN" scan --snapshot fixtures/tools.evil.json --baseline baseline.json > /dev/null
+          code=$?
+          set -e
+          # 同快照不应产生 rug-pull；其余 finding 仍会触发 exit 1。
+          test "$code" -eq 1
