@@ -27,13 +27,23 @@ jobs:
       - name: Build (native)
         run: moon build --target native
 
+      # MoonBit native 后端在不同平台都可能产出 `.exe` 后缀，动态定位。
+      - name: Locate binary
+        run: |
+          BIN=$(find _build/native -type f \( -name main -o -name main.exe \) | head -1)
+          if [ -z "$BIN" ]; then
+            echo "binary not found"; exit 1
+          fi
+          chmod +x "$BIN"
+          echo "MCPSCAN_BIN=$BIN" >> "$GITHUB_ENV"
+          echo "using $BIN"
+
       # 直接运行二进制：`moon run` 会掩盖进程真实退出码，CI 门禁必须验证
       # 0/1/2 三种语义。
       - name: Exit code 1 on critical findings
         run: |
-          BIN=./_build/native/debug/build/cmd/main/main
           set +e
-          "$BIN" scan --snapshot fixtures/tools.evil.json > /dev/null
+          "$MCPSCAN_BIN" scan --snapshot fixtures/tools.evil.json > /dev/null
           code=$?
           set -e
           echo "exit=$code"
@@ -41,23 +51,20 @@ jobs:
 
       - name: Exit code 0 on clean fixture
         run: |
-          BIN=./_build/native/debug/build/cmd/main/main
-          "$BIN" scan --snapshot fixtures/tools.benign.json
+          "$MCPSCAN_BIN" scan --snapshot fixtures/tools.benign.json
 
       - name: Exit code 2 on read failure
         run: |
-          BIN=./_build/native/debug/build/cmd/main/main
           set +e
-          "$BIN" scan --snapshot does-not-exist.json > /dev/null
+          "$MCPSCAN_BIN" scan --snapshot does-not-exist.json > /dev/null
           code=$?
           set -e
           test "$code" -eq 2
 
       - name: SARIF output is valid JSON 2.1.0
         run: |
-          BIN=./_build/native/debug/build/cmd/main/main
           set +e
-          "$BIN" scan --snapshot fixtures/tools.evil.json --format sarif > scan.sarif
+          "$MCPSCAN_BIN" scan --snapshot fixtures/tools.evil.json --format sarif > scan.sarif
           set -e
           python3 - << 'PY'
           import json
@@ -70,10 +77,9 @@ jobs:
 
       - name: Baseline round trip
         run: |
-          BIN=./_build/native/debug/build/cmd/main/main
-          "$BIN" baseline --snapshot fixtures/tools.evil.json --write baseline.json
+          "$MCPSCAN_BIN" baseline --snapshot fixtures/tools.evil.json --write baseline.json
           set +e
-          "$BIN" scan --snapshot fixtures/tools.evil.json --baseline baseline.json > /dev/null
+          "$MCPSCAN_BIN" scan --snapshot fixtures/tools.evil.json --baseline baseline.json > /dev/null
           code=$?
           set -e
           # 同快照不应产生 rug-pull；其余 finding 仍会触发 exit 1。
