@@ -1,0 +1,3 @@
+import {
+  "ShunjunGu/mcpscan/src" @src,
+} for "test"
