@@ -1,0 +1,6 @@
+pkgtype(kind: "executable")
+
+import {
+  "ShunjunGu/mcpscan/src" @mcpscan,
+  "moonbitlang/core/env",
+}
