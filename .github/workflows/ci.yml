@@ -14,6 +14,10 @@ jobs:
       - name: Setup MoonBit
         uses: hustcer/setup-moonbit@v1
 
+      # runner 上缓存的注册表索引可能落后，导致 moonbitlang/x 无法解析。
+      - name: Refresh registry index
+        run: moon update
+
       - name: Check (deny warnings)
         run: moon check --deny-warn
 
