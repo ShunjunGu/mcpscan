@@ -26,19 +26,20 @@ CI 覆盖：`moon update` → `moon check --deny-warn` → `moon test` → `moon
 - [x] 工程骨架：`moon check --deny-warn` 零告警
 - [x] 归一化层：不可见字符剥离、Unicode Tag 计数、全角折叠、UTF-16 偏移映射
 - [x] 快照解析：`tools/list` JSON → `ToolDef[]`
-- [x] 检测规则 9 条：TP001 / TP002 / TP003 / TP004 / TP005 / TP006 / TP013 / TP016 / TP019
+- [x] 检测规则 13 条：TP001 / TP002 / TP003 / TP004 / TP005 / TP006 / TP009 / TP013 / TP014 / TP015 / TP016 / TP018 / TP019
+- [x] 纯文本规则（`src/rules_text.mbt`）：TP009 Levenshtein 仿冒、TP014 超长描述、TP015 base64/hex 载荷解码、TP018 混排同形字
 - [x] 能力推断层：工具名按 `_`/`-` 切词 + schema 参数名，不使用描述文本
 - [x] TP019：SHA-256 定义指纹（覆盖 annotations）、基线写入与比对
 - [x] CLI `baseline --snapshot --write`；`scan --baseline`
 - [x] 报告：text / JSON / Markdown / SARIF 2.1.0
 - [x] CI 退出码 0 / 1 / 2（native 二进制实测）
-- [x] 41 个回归测试
-- [x] 恶意 fixture（8 个工具、11 条 finding）与良性 fixture（3 个工具、0 finding）
+- [x] 54 个回归测试
+- [x] 恶意 fixture（12 个工具、14 条 finding）与良性 fixture（3 个工具、0 finding）
 - [x] GitHub Actions 全绿
 
 ## 待办
 
-- [ ] 规则 TP007–TP012 / TP014 / TP015 / TP017 / TP018 / TP020（11 条）
+- [ ] 规则 TP007 / TP008 / TP010 / TP011 / TP012 / TP017 / TP020（7 条，结构分析类）
 - [ ] `mcp.json` 配置解析
 - [ ] 真实服务器扫描 ≥3，产出检出率/误报报告
 - [ ] stdio 连接模式（可选）

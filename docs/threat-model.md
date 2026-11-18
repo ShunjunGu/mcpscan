@@ -79,16 +79,16 @@ MCP 的 `tools/list` 返回结构大致为：
 | TP006 | hidden-capability | high | 工具名 token（按 `_`/`-` 切词）或 schema 参数名显示写/删除/执行/网络能力，且描述中未出现对应能力词；`readOnlyHint=true` 时让位给 TP016 | 描述使用词表外的近义词；参数名通用（`data`） |
 | TP007 | schema-mismatch | medium | 描述承诺的字段集合与 `required`/`properties` 不一致 | 描述用自然语言、难以完全对齐 |
 | TP008 | overbroad-schema | medium | `additionalProperties: true` 且存在自由字符串参数 + 指令性描述 | 通用透传工具 |
-| TP009 | typosquat | medium | 工具名与内置知名工具集编辑距离 ≤2 且非同名 | 合法近似命名 |
+| TP009 | typosquat | medium | 工具名（小写）与 16 个常见 MCP 工具名清单的 Levenshtein 距离 ≤2 且非同名；名称长度 <5 跳过 | 合法近似命名；清单外工具名不比较 |
 | TP010 | payload-splitting | high | 指令片段分布在 description + enum/default/title 中，单独看均不完整 | 多语言文档 |
 | TP011 | language-switch | medium | 描述主体语言与结尾指令语言不一致，且切换段落含指令词 | 双语项目 |
 | TP012 | authority-spoofing | high | "system"、"administrator"、"security audit" 等身份声明 + 指令 | 合法帮助文本 |
 | TP013 | conditional-trigger | high | "after N uses / calls"、"once trusted / after trust is established"、"使用 N 次后"、"信任建立后"、"达到 N 次"等计数或信任条件 | 业务工具的限流说明；纯日期条件未实现，列入覆盖缺口 |
-| TP014 | excessive-description | low | 描述长度 > 2,000 字符或超过同批中位数 8 倍 | 复杂工具的正常长文档 |
-| TP015 | encoded-payload | high | 连续 base64/hex 长度 ≥ 80 且解码后可打印比 > 0.8 | 内嵌证书/密钥样例 |
+| TP014 | excessive-description | low | 描述长度 > 2,000 字符（UTF-16 code unit）；"同批中位数 8 倍"相对判定 v0.1 未实现 | 复杂工具的正常长文档 |
+| TP015 | encoded-payload | high | 长度 ≥80 的 base64 字符集 run（纯 hex 偶数长度走 hex 解码），解码后含空格、可打印比 >0.8、长度 ≥16 | 内嵌证书/密钥样例（通常无空格或不可打印）；SHA-256/MD5 摘要 <80 不命中 |
 | TP016 | readonly-lying | high | `readOnlyHint=true` 且工具名 token 或 schema 参数名显示 mutating 能力（写/删除/执行/网络） | annotation 填写不准确但实现确实只读 |
 | TP017 | server-instruction | medium | server instructions / prompt 模板含指令性语句 | 正常的服务器使用说明 |
-| TP018 | homoglyph | medium | 工具名含拉丁/西里尔/希腊混排同形字符 | 国际化命名 |
+| TP018 | homoglyph | medium | 工具名同时含 ASCII 拉丁字母与西里尔（U+0400–04FF）/希腊（U+0370–03FF）字母 | 纯西里尔/希腊名称（无 ASCII 字母）不报；合法国际化混排命名 |
 | TP019 | rug-pull | critical | 规范化定义指纹（名称+描述+两 schema+annotations 的 SHA-256）与基线不一致 → critical；基线中不存在的新工具 → high；基线中有而本次消失 → medium | 正常的版本升级；需人工确认后更新基线 |
 | TP020 | output-injection | medium | `outputSchema` 的描述/example 含指令性文本 | 示例数据本身含命令 |
 
