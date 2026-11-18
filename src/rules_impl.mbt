@@ -808,6 +808,18 @@ pub fn audit_tools_with(
     for f in check_tp016_readonly_lying(tool) {
       out.push(f)
     }
+    for f in check_tp009_typosquat(tool) {
+      out.push(f)
+    }
+    for f in check_tp014_excessive_description(tool) {
+      out.push(f)
+    }
+    for f in check_tp015_encoded_payload(tool) {
+      out.push(f)
+    }
+    for f in check_tp018_homoglyph(tool) {
+      out.push(f)
+    }
   }
   for f in check_tp003_cross_tool(tools) {
     out.push(f)
